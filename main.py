@@ -4,6 +4,7 @@ import re
 
 maxIterations = 50
 epsilon = 10**-8
+myInfinity = 100
 
 # Variables for color diagram
 
@@ -12,7 +13,7 @@ resolution = 400
 z0Grid = []
 maxDiffGrid = np.zeros((resolution, resolution))
 
-# Getting input of r
+# -------------Getting input of r-------------
 
 def parseComplexString (complexStr):
     complexStr = ((complexStr.replace('(', '')).replace(')', '')).split(",")
@@ -29,7 +30,7 @@ while tempR == 0:
         tempR = 0
         print("Format: (X, Y) where X and Y are numbers!")
 
-# Calculating max(k = 0, 1, ..., 50)|wk-zk|
+# -------------Calculating max(k = 0, 1, ..., 50)|wk-zk|-------------
 
 def getMaxDiff(z0):
     z = z0
@@ -37,15 +38,19 @@ def getMaxDiff(z0):
     maxDiff = 0
 
     for _ in range(maxIterations + 1):
-        z = z**2 + r
-        w = w**2 + r
         diff = abs(w - z)
         if diff > maxDiff:
             maxDiff = diff
+
+        if abs(z) > myInfinity or abs(w) > myInfinity:
+            break
+        
+        z = z**2 + r
+        w = w**2 + r
     
     return maxDiff
 
-# Preparing for the color diagram
+# -------------Preparing for the color diagram-------------
 
 reVal = np.linspace(reMin, reMax, resolution)
 imVal = np.linspace(imMin, imMax, resolution)
@@ -66,11 +71,10 @@ for i in range(resolution):
     for j in range(resolution):
         z0 = z0Grid[i, j]
         maxDiffGrid[i, j] = getMaxDiff(z0)
-        print(i, j)
 
-# Rendering the color diagram
+# -------------Rendering the color diagram-------------
 mpl.figure(figsize=(8, 8))
-mpl.imshow(maxDiffGrid, extent=[reMin, reMax, imMin, imMax], cmap='inferno', origin='lower')
+mpl.imshow(maxDiffGrid, extent=[reMin, reMax, imMin, imMax], cmap='gist_gray_r', origin='lower')
 mpl.colorbar(label=r'$\max |w_k - z_k|$')
 mpl.xlabel(r'Re$(z_0)$')
 mpl.ylabel(r'Im$(z_0)$')
